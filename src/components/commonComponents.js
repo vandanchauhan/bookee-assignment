@@ -34,9 +34,8 @@ const isShiftOverlapping = (shift, myShiftsData) => {
   const startTime = shift.startTime;
   const endTime = shift.endTime;
   myShiftsData && myShiftsData.forEach((currShift, index) => {
-    const isTimeOverLapping = ((currShift.endTime >= startTime &&  startTime >=currShift.startTime) || 
-    (currShift.endTime >= endTime &&  endTime >= currShift.startTime));
-    // const idAreaOverLapping = currShift.area === shift.area;
+    const isTimeOverLapping = ((currShift.endTime > startTime &&  startTime > currShift.startTime) || 
+    (currShift.endTime > endTime &&  endTime > currShift.startTime));
     if (isTimeOverLapping) {
       isOverlapping =  true;
     }

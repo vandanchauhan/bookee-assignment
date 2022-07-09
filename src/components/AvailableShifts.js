@@ -4,7 +4,7 @@ import moment from "moment";
 import { getShiftsByArea, getShiftsByDay } from './util';
 import { renderShifts, renderDayHeader } from './commonComponents';
 
-function AvailableShifts({ availableShiftsData, setActionTaken, actionTaken, myShiftsData}) {
+function AvailableShifts({ sortedShiftsData, availableShiftsData, setActionTaken, actionTaken, myShiftsData}) {
     const [availableShifts, setAvailableShifts] = useState();
     const [myShifts, setmyShifts] = useState();
     const [currArea, setCurrArea] = useState();
@@ -20,6 +20,7 @@ function AvailableShifts({ availableShiftsData, setActionTaken, actionTaken, myS
     }, []);
 
     useEffect(() => {
+      console.log('Available shift data changed');
       if (availableShifts) {
         setCurrArea(Object.keys(availableShifts)[0]);
       }

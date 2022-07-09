@@ -10,6 +10,7 @@ function Scheduler() {
   const [shiftsData, setShiftsData] = useState();
   const [sortedShiftsData, setSortedShiftsData] = useState();
   const [actionTaken, setActionTaken] = useState(false);
+  const [isDataUpdated, setIsDataUpdated] = useState(false);
   // 0 -> My shifts , 1 -> Available Shifts
   const [currTab, setCurrTab] = useState(1);
 
@@ -25,8 +26,6 @@ function Scheduler() {
 
   useEffect(() => {
     console.log('Refetch data triggered');
-    console.log('actionTaken:'+ actionTaken);
-    console.log('currTab:'+ actionTaken);
     getShifts().then((res) => {
       setShiftsData(res.data);
     });
@@ -35,16 +34,18 @@ function Scheduler() {
   useEffect(() => {
     if (shiftsData) {
       console.log('Main app state changed');
-      debugger;
       const newData = segregateShiftsData(shiftsData);
-      debugger;
-      console.log(_.isEqual(shiftsData,newData));
       setSortedShiftsData({...newData});
     }
   }, [shiftsData]);
 
+  useEffect(() => { 
+    console.log('sortedShiftsData changed');
+      setIsDataUpdated(!isDataUpdated);
+  }, [sortedShiftsData])
+
   return (
-    <div  className="w-2/3 self-center">
+    <div className="w-2/3 self-center">
       <div className="tabHeaderCont my-4">
         <div className="tabHeader ml-5">
           <p
@@ -71,7 +72,7 @@ function Scheduler() {
           </p>
         </div>
       </div>
-      <div className="border border-borderGrey rounded-md bg-bgWhite">
+      <div key={isDataUpdated} className="border border-borderGrey rounded-md bg-bgWhite">
         {sortedShiftsData &&
           (currTab === 0 ? (
             <MyShifts
@@ -82,7 +83,7 @@ function Scheduler() {
           ) : (
             <AvailableShifts
               myShiftsData={sortedShiftsData.myShifts}
-              availableShiftsData={sortedShiftsData?.availableShifts}
+              availableShiftsData={sortedShiftsData.availableShifts}
               setActionTaken={setActionTaken}
               actionTaken={actionTaken}
             />
