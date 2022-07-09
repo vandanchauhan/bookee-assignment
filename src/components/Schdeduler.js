@@ -4,7 +4,7 @@ import { getShifts } from "../Apis/api";
 import MyShifts from "./MyShifts";
 import AvailableShifts from "./AvailableShifts";
 import { segregateShiftsData } from "./util";
-const _ = require('lodash'); 
+const _ = require("lodash");
 
 function Scheduler() {
   const [shiftsData, setShiftsData] = useState();
@@ -12,7 +12,7 @@ function Scheduler() {
   const [actionTaken, setActionTaken] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   // 0 -> My shifts , 1 -> Available Shifts
-  const [currTab, setCurrTab] = useState(1);
+  const [currTab, setCurrTab] = useState(0);
 
   const handleTabChange = (currTab) => {
     setCurrTab(currTab);
@@ -25,7 +25,6 @@ function Scheduler() {
   }, []);
 
   useEffect(() => {
-    console.log('Refetch data triggered');
     getShifts().then((res) => {
       setShiftsData(res.data);
     });
@@ -33,16 +32,14 @@ function Scheduler() {
 
   useEffect(() => {
     if (shiftsData) {
-      console.log('Main app state changed');
       const newData = segregateShiftsData(shiftsData);
-      setSortedShiftsData({...newData});
+      setSortedShiftsData({...newData });
     }
   }, [shiftsData]);
 
-  useEffect(() => { 
-    console.log('sortedShiftsData changed');
-      setIsDataUpdated(!isDataUpdated);
-  }, [sortedShiftsData])
+  useEffect(() => {
+    setIsDataUpdated(!isDataUpdated);
+  }, [sortedShiftsData]);
 
   return (
     <div className="w-2/3 self-center">
@@ -72,7 +69,10 @@ function Scheduler() {
           </p>
         </div>
       </div>
-      <div key={isDataUpdated} className="border border-borderGrey rounded-md bg-bgWhite">
+      <div
+        key={isDataUpdated}
+        className="border border-borderGrey rounded-md bg-bgWhite"
+      >
         {sortedShiftsData &&
           (currTab === 0 ? (
             <MyShifts
@@ -94,4 +94,3 @@ function Scheduler() {
 }
 
 export default Scheduler;
-

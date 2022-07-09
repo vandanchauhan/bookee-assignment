@@ -1,22 +1,73 @@
 import moment from "moment";
 import { bookShift, cancelShift } from "../Apis/api.js";
+import { greenSpinner, pinkSpinner } from "./util";
 
-export const bookButton = (onClick, isBlur) => {
+export const bookButton = (onClick, isBlur, buttonLoading) => {
   return (
-    <div onClick={() => {
-      return !isBlur && onClick();
-    }} className={isBlur ? 'rounded-full border border-green opacity-50' : 'rounded-full border border-green'}>
-      <p className="px-8 py-1 font-bold cursor-pointer text-darkGreen">Book</p>
+    <div
+      onClick={() => {
+        return !isBlur && onClick();
+      }}
+      className={
+        isBlur
+          ? "rounded-full border border-green opacity-50"
+          : "rounded-full border border-green cursor-pointer"
+      }
+    >
+      {buttonLoading ? (
+        <p className="px-8 py-1 font-bold text-darkGreen">
+          {greenSpinner()}
+        </p>
+      ) : (
+        <p className="px-8 py-1 font-bold text-darkGreen">
+          Book
+        </p>
+      )}
     </div>
   );
 };
 
-export const cancelButton = (onClick, isBlur) => {
+export const cancelButton = (onClick, isBlur, buttonLoading) => {
   return (
-    <div onClick={() => {
-      return !isBlur && onClick()
-    }} className={isBlur ? 'rounded-full border border-pink opacity-50' : 'rounded-full border border-pink'}>
-      <p className="px-6 py-1 font-bold cursor-pointer text-darkPink">Cancel</p>
+    <div
+      onClick={() => {
+        return !isBlur && onClick();
+      }}
+      className={
+        isBlur
+          ? "rounded-full border border-pink opacity-50"
+          : "rounded-full border border-pink cursor-pointer"
+      }
+    >
+      {buttonLoading ? (
+        <p className="px-6 py-1 font-bold text-darkPink">
+          {pinkSpinner()}
+        </p>
+      ) : (
+        <p className="px-6 py-1 font-bold text-darkPink">
+          Cancel
+        </p>
+      )}
+    </div>
+  );
+};
+
+export const bookLoadingButton = () => {
+  return (
+    <div className={"rounded-full border border-green"}>
+      <p className="px-8 py-1 w-5 font-bold cursor-pointer text-darkGreen">
+        {greenSpinner()}
+      </p>
+    </div>
+  );
+};
+
+export const cancelLoadingButton = () => {
+  return (
+    <div className={"rounded-full border border-pink"}>
+      <p className="px-8 py-1 w-5 font-bold cursor-pointer text-darkGreen">
+        {greenSpinner()}
+      </p>
     </div>
   );
 };
@@ -33,17 +84,27 @@ const isShiftOverlapping = (shift, myShiftsData) => {
   let isOverlapping = false;
   const startTime = shift.startTime;
   const endTime = shift.endTime;
-  myShiftsData && myShiftsData.forEach((currShift, index) => {
-    const isTimeOverLapping = ((currShift.endTime > startTime &&  startTime > currShift.startTime) || 
-    (currShift.endTime > endTime &&  endTime > currShift.startTime));
-    if (isTimeOverLapping) {
-      isOverlapping =  true;
-    }
-  })
+  myShiftsData &&
+    myShiftsData.forEach((currShift, index) => {
+      const isTimeOverLapping = (currShift.endTime === endTime && startTime === currShift.startTime) ||
+      (currShift.endTime > startTime && startTime > currShift.startTime) ||
+        (currShift.endTime > endTime && endTime > currShift.startTime);
+      if (isTimeOverLapping) {
+        isOverlapping = true;
+      }
+    });
   return isOverlapping;
-}
+};
 
-export const renderSingleShift = (shift, currTab, setActionTaken, actionTaken, myShiftsData) => {
+export const renderSingleShift = (
+  shift,
+  currTab,
+  setActionTaken,
+  actionTaken,
+  myShiftsData,
+  buttonLoading,
+  setButtonLoading
+) => {
   const timeNow = new Date();
   const isOverlapping = isShiftOverlapping(shift, myShiftsData);
   return (
@@ -65,32 +126,64 @@ export const renderSingleShift = (shift, currTab, setActionTaken, actionTaken, m
         )}
       </div>
       <div className="flex flex-row items-center">
-        {shift.booked && <p className="text-textBlue font-semibold text-md mr-4">Booked</p>}
-        {!shift.booked && isOverlapping && <p className="text-darkPink font-semibold text-md mr-4">Overlapping</p>}
+        {shift.booked && currTab === 1 && (
+          <p className="text-textBlue font-semibold text-md mr-4">Booked</p>
+        )}
+        {!shift.booked && isOverlapping && (
+          <p className="text-darkPink font-semibold text-md mr-4">
+            Overlapping
+          </p>
+        )}
         {shift.booked
-          ? cancelButton(() => {
-              cancelShift(shift.id)
-                .then((res) => {
-                  setActionTaken(!actionTaken);
-                })
-                .catch((err) => {
-                });
-            }, timeNow > shift.startTime)
-          : bookButton(() => {
-              bookShift(shift.id)
-                .then((res) => {
-                  setActionTaken(!actionTaken);
-                })
-                .catch((err) => {
-                });
-            }, timeNow > shift.startTime || isOverlapping )}
+          ? cancelButton(
+              () => {
+                setButtonLoading(shift.id);
+                cancelShift(shift.id)
+                  .then((res) => {
+                    setActionTaken(!actionTaken);
+                    // setButtonLoading(false);
+                  })
+                  .catch((err) => {});
+              },
+              timeNow > shift.startTime,
+              buttonLoading === shift.id
+            )
+          : bookButton(
+              () => {
+                setButtonLoading(shift.id);
+                bookShift(shift.id)
+                  .then((res) => {
+                    setActionTaken(!actionTaken);
+                    // setButtonLoading(false);
+                  })
+                  .catch((err) => {});
+              },
+              timeNow > shift.startTime || isOverlapping,
+              buttonLoading === shift.id
+            )}
       </div>
     </div>
   );
 };
 
-export const renderShifts = (currShifts, currTab, setActionTaken, actionTaken, myShiftsData) => {
+export const renderShifts = (
+  currShifts,
+  currTab,
+  setActionTaken,
+  actionTaken,
+  myShiftsData,
+  buttonLoading,
+  setButtonLoading
+) => {
   return currShifts.map((shift, index) => {
-    return renderSingleShift(shift, currTab, setActionTaken, actionTaken, myShiftsData);
+    return renderSingleShift(
+      shift,
+      currTab,
+      setActionTaken,
+      actionTaken,
+      myShiftsData,
+      buttonLoading,
+      setButtonLoading
+    );
   });
 };
