@@ -1,23 +1,24 @@
 import logo from './logo.svg';
 import './App.css';
+import Scheduler from './components/Schdeduler';
+import moment from 'moment';
 
 function App() {
+
+  moment.updateLocale('en', {
+    calendar : {
+        lastDay : '[Yesterday]',
+        sameDay : '[Today]',
+        nextDay : '[Tomorrow]',
+        lastWeek : 'dddd D',
+        nextWeek : 'dddd D',
+        sameElse : 'dddd D'
+    }
+});
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="flex flex-1 flex-row justify-center bg-bgGray">
+      <Scheduler/>
     </div>
   );
 }

@@ -1,0 +1,11 @@
+
+.tabHeaderCont {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.tabHeader {
+    width: 20%;
+    cursor: pointer;
+}
